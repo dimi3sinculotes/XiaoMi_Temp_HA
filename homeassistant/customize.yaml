@@ -1,0 +1,28 @@
+# Customize
+  group.all_automations:
+    hidden: false
+
+  group.all_scripts:
+    hidden: false
+
+  #Xiaomi
+  sensor.humidity_158d000201ad47:
+    hidden: false
+    friendly_name: Home Humidity
+
+  sensor.temperature_158d000201ad47:
+    hidden: false
+    friendly_name: Home Temp
+
+  #Yahoo
+  sensor.yahoo_sensor_current:
+    hidden: false
+    friendly_name: Meteo State
+  
+  sensor.yahoo_sensor_humidity:
+    hidden: false
+    friendly_name: Ext Humidity
+  
+  sensor.yahoo_sensor_temperature:
+    hidden: false
+    friendly_name: Ext Temp

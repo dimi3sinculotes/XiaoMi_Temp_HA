@@ -1,0 +1,89 @@
+  lights:
+    name: Yeelight
+    entities:
+      - light.bulb
+
+  temp_control:
+    name: Temp Control
+    control: hidden
+    entities:
+      - sensor.humidity_158d000201ad47
+      - sensor.temperature_158d000201ad47
+      - climate.thermostat
+
+  broadlink:
+    name: broadlink
+    entities:
+      - switch.tv
+
+  ac_broadlink:
+    name: ac_broadlink
+    control: hidden
+    entities:
+      - switch.ac_on
+
+  ac_broadlink_com:
+    name: ac_broadlink
+    entities:
+      - switch.ac_on
+      - switch.ac_plus
+      - switch.ac_minus
+
+  oki_broadlink:
+    name: oki_broadlink
+    entities:
+      - switch.oki_on
+      - switch.oki_ch_plus
+      - switch.oki_ch_minus
+      - switch.oki_vol_plus
+      - switch.oki_vol_minus
+      - switch.oki_src
+      - switch.oki_mute
+
+  thermostat_scheduler:
+    name: Thermostat Scheduler
+    control: hidden
+    entities:
+      - input_number.temperature
+      - input_number.hours
+      - input_number.minutes
+      - input_number.duration
+
+  time:
+    name: Time
+    control: hidden
+    entities:
+      - sensor.date
+      - sensor.time
+#Views
+  temp_view:
+    name: Temperature Control
+    view: yes
+    entities:
+      - group.temp_control
+      - group.ac_broadlink
+      - group.thermostat_scheduler
+      - group.time
+
+  default_view:
+    name: Elements
+    view: yes 
+    entities:
+      #- group.yahoo
+      - group.lights
+      - group.temp_control  
+      - group.broadlink
+      - group.ac_broadlink_com
+      - group.oki_broadlink
+
+  automations:
+    name: automations
+    view: yes
+    entities:
+      - group.all_automations
+
+  all_swithces:
+    name: all_swithces
+    view: yes
+    entities:
+      - group.all_swithces

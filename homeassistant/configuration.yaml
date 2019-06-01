@@ -1,0 +1,171 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: Home
+  # Location required to calculate the time the sun rises and sets
+  latitude: 40.3458
+  longitude: -3.8249
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 714
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: Europe/Madrid
+  # Customization file
+  customize: !include customize.yaml
+
+# Enables the frontend
+frontend:
+  themes: !include_dir_merge_named themes/
+
+# Enables configuration UI
+config:
+
+http:
+
+updater:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time
+history:
+
+# View all events in a logbook
+logbook:
+
+# Enables a map showing the location of tracked devices
+map:
+
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+
+light:
+  platform: yeelight
+  devices:
+    192.168.1.102:
+      name: Bulb            #Light's name
+      transition: 350       #By default
+      use_music_mode: False #By default
+      save_on_change: True  #By default
+
+xiaomi_aqara:
+  discovery_retry: 5
+  gateways:
+    - key: hit7azq3l1k3rxrk
+
+sensor:
+  - platform: template
+    sensors:
+      temp_offset:
+        value_template: '{{states.sensor.temperature_158d000201ad47.state | float + 1.1}}'
+        friendly_name: "OffsetSetting"
+        unit_of_measurement: “°C”
+
+      scheduler_time:
+        friendly_name: 'Time'
+        value_template: '{{ "%0.02d:%0.02d" | format(states("input_number.hours") | int, states("input_number.minutes") | int) }}'
+
+      turn_off_time:
+        friendly_name: 'TurnOffTime'
+        value_template: >
+          {% if states.input_number.hours.state | int + states.input_number.duration.state | int >= 24 %} 
+            {{ "%0.02d:%0.02d" | format(states.input_number.hours.state | int + states.input_number.duration.state | int - 24, states("input_number.minutes") | int) }}
+          {% else %}
+            {{ "%0.02d:%0.02d" | format(states.input_number.hours.state | int + states.input_number.duration.state | int, states("input_number.minutes") | int) }}
+          {% endif %}
+
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+
+climate:
+  - platform: generic_thermostat
+    name: thermostat
+    heater: switch.ac_on
+    target_sensor: sensor.temp_offset
+    #ac_mode: true
+
+switch:
+  - platform: broadlink
+    host: 192.168.1.107
+    mac: '34:EA:34:6F:98:F6'
+    timeout: 15
+    switches:
+      tv:
+        friendly_name: "Samsung TV Power"
+        command_on: 'JgCwBBQ1FTQVNRQABgGWkRQ1FTQVNRQQFRAVEBUPFRAVNBU1FTQVEBUQFBAVEBUQFBAVNRQQFRAVEBQQFRAVEBQ1FRAUNRU0FTUUNRU0FTUVAAX+mZAVNBU1FDUVEBQQFRAVEBQQFTUUNRU0FRAVEBQQFRAVEBQQFTUVEBQQFRAVEBQQFRAVNBUQFDUVNRQ1FTQVNRQ1FQAGAZaQFTUUNRU0FRAVEBQQFRAVEBQ1FTQVNRQQFRAVEBUPFg8VEBU0FRAVEBQQFRAVEBQQFTUUEBU1FDUVNBU1FDUVNBUABgGVkhQ1FTQVNRQQFRAVEBQQFRAVNBU1FDUVEBQQFRAVEBQQFRAVNBUQFRAVDxUQFRAVEBQ1FRAUNRU0FTUUNRU0FTUUAAYClZEVNBU1FDUVEBQQFRAVEBQQFTUTNhQ1FRAVEBQQFRAVEBUPFTUUERQQFRAVEBQQFRAVNBUQFTQVNRQ1FTQVNRQ1FQAGAZWRFTUUNRU0FRAVEBQQFRAVEBQ1FTQVNRQRFBAVEBUQFBAVEBU0FRAUERQQFRAVEBQQFTUUEBU1FDUVNBU1FTQVNBUABgGWkRQ1FTQVNRQQFRAVEBQQFRAVNBU1FTQVEBUQFBAVEBUQFBAVNRMRFRAVEBQQFRAVEBQ1FRAUNRU0FTUVNBU0FTUVAAYBlZEVNRQ1FDUVEBQRExEVEBUQEzYUNRU1FBAVEBQRExEUERUQFDUUERMRFBEUERQRExEUNhMRFDYTNhM2FDYTNhM2FAAGApOUETgSNxI4ERMSExITExEUERQ1FDYTNhITExEUERQRExITERI4ExEUERMSERMUERMSEzYUERM2FDUTNxQ1FDUUNhMABgOWkBU0FTUUNRUQFRAUEBUQFRAUNRU0FTUUEBUQFRAUEBUQFRAUNRUQFBAUERQRExEUERQ1FBETNxM2EzYSOBE4EjcSAAYEk5QSNxQ1FDYTEhMRFBEUEBQSEzUUNhQ1FBEUERMSExEUERQRFDUTEhMRFBEVEBMRFBEUNRQRFDUUNRQ2FDUUNRQ2FAAGApSSFDYTNhQ1FBEUERQRFBAUERQ1FDUUNhQRFBETERQRFBEUEBQ1FBEUERQRExEUERQREzYUERM2EzYUNRQ2FDUUNRQABgKWkRU0FTQVNRUQFBEUEBUQFBEUNRU0FTQVEBUQFRAUEBUQFQ8VNRUQFBAVEBUQFBEUEBU0FRAVNBU0FTUVNBU1FTQVAAYBlZEVNRU0FTQVEBUQFRAUERQQFTQVNBU1FRAUERQQFRAVEBQQFTQVEBUQFRAUEBUQFRAUNRUQFDUVNBU0FTUVNBU1FAAGApWRFTQVNRU0FRAVEBQQFRAVEBQ1FTQVNBURFBAVEBQRFBAVEBQ1FRAVEBQQFRAVEBQQFTQVEBU0FTUVNBU0FTUVNBUABgGWkBU1FTQVNRUQFBAVEBUQFBAVNBU1FTQVEBUQFBEUEBUQFBEUNBURFBAVEBUQFBAVEBU0FRAVNBU0FTUVNBU0FTUVAAYBlZEVNBU1FTQVERQQFRAUEBUQFTQVNBU1FRAUERQQFRAUERQQFTQVEBUQFBEUEBUQFRAUNRUQFDUVNBU0FTUVNBU0FQANBQAAAAAAAAAA'
+        command_off: 'JgCwBBQ1FTQVNRQABgGWkRQ1FTQVNRQQFRAVEBUPFRAVNBU1FTQVEBUQFBAVEBUQFBAVNRQQFRAVEBQQFRAVEBQ1FRAUNRU0FTUUNRU0FTUVAAX+mZAVNBU1FDUVEBQQFRAVEBQQFTUUNRU0FRAVEBQQFRAVEBQQFTUVEBQQFRAVEBQQFRAVNBUQFDUVNRQ1FTQVNRQ1FQAGAZaQFTUUNRU0FRAVEBQQFRAVEBQ1FTQVNRQQFRAVEBUPFg8VEBU0FRAVEBQQFRAVEBQQFTUUEBU1FDUVNBU1FDUVNBUABgGVkhQ1FTQVNRQQFRAVEBQQFRAVNBU1FDUVEBQQFRAVEBQQFRAVNBUQFRAVDxUQFRAVEBQ1FRAUNRU0FTUUNRU0FTUUAAYClZEVNBU1FDUVEBQQFRAVEBQQFTUTNhQ1FRAVEBQQFRAVEBUPFTUUERQQFRAVEBQQFRAVNBUQFTQVNRQ1FTQVNRQ1FQAGAZWRFTUUNRU0FRAVEBQQFRAVEBQ1FTQVNRQRFBAVEBUQFBAVEBU0FRAUERQQFRAVEBQQFTUUEBU1FDUVNBU1FTQVNBUABgGWkRQ1FTQVNRQQFRAVEBQQFRAVNBU1FTQVEBUQFBAVEBUQFBAVNRMRFRAVEBQQFRAVEBQ1FRAUNRU0FTUVNBU0FTUVAAYBlZEVNRQ1FDUVEBQRExEVEBUQEzYUNRU1FBAVEBQRExEUERUQFDUUERMRFBEUERQRExEUNhMRFDYTNhM2FDYTNhM2FAAGApOUETgSNxI4ERMSExITExEUERQ1FDYTNhITExEUERQRExITERI4ExEUERMSERMUERMSEzYUERM2FDUTNxQ1FDUUNhMABgOWkBU0FTUUNRUQFRAUEBUQFRAUNRU0FTUUEBUQFRAUEBUQFRAUNRUQFBAUERQRExEUERQ1FBETNxM2EzYSOBE4EjcSAAYEk5QSNxQ1FDYTEhMRFBEUEBQSEzUUNhQ1FBEUERMSExEUERQRFDUTEhMRFBEVEBMRFBEUNRQRFDUUNRQ2FDUUNRQ2FAAGApSSFDYTNhQ1FBEUERQRFBAUERQ1FDUUNhQRFBETERQRFBEUEBQ1FBEUERQRExEUERQREzYUERM2EzYUNRQ2FDUUNRQABgKWkRU0FTQVNRUQFBEUEBUQFBEUNRU0FTQVEBUQFRAUEBUQFQ8VNRUQFBAVEBUQFBEUEBU0FRAVNBU0FTUVNBU1FTQVAAYBlZEVNRU0FTQVEBUQFRAUERQQFTQVNBU1FRAUERQQFRAVEBQQFTQVEBUQFRAUEBUQFRAUNRUQFDUVNBU0FTUVNBU1FAAGApWRFTQVNRU0FRAVEBQQFRAVEBQ1FTQVNBURFBAVEBQRFBAVEBQ1FRAVEBQQFRAVEBQQFTQVEBU0FTUVNBU0FTUVNBUABgGWkBU1FTQVNRUQFBAVEBUQFBAVNBU1FTQVEBUQFBEUEBUQFBEUNBURFBAVEBUQFBAVEBU0FRAVNBU0FTUVNBU0FTUVAAYBlZEVNBU1FTQVERQQFRAUEBUQFTQVNBU1FRAUERQQFRAUERQQFTQVEBUQFBEUEBUQFRAUNRUQFDUVNBU0FTUVNBU0FQANBQAAAAAAAAAA'
+      ac_on:
+        friendly_name: "AC On/Off"
+        command_on: 'JgBAAAABGYkVMxUPFQ8VDxUyFRAUEBQQFBAUEBQQFBAUEBQQFBAUEBQQFBAUMxUzFQ8VMxUPFBAUEBQ0FTIVMxUADQUAAAAAAAAAAA=='
+        command_off: 'JgBAAAABGogWMhUPFRAUEBQzFQ8VDxUPFTMVMhYPFQ8VDxUPFQ8VDxUPFQ8VDxUPFQ8VMhUQFDMVDxUQFBAUMxUADQUAAAAAAAAAAA=='
+      ac_plus:
+        friendly_name: "AC Plus"
+        command_on: 'JgBAAAABGYkVMxUPFQ8VDxUyFRAVDxUPFQ8VDxUPFQ8VMhUQFBAUEBQQFDMVDxUzFQ8VMxUPFQ8VDxUPFQ8VMhUADQUAAAAAAAAAAA=='
+        command_off: 'JgBAAAABGYkVMxUPFQ8VDxUyFRAVDxUPFQ8VDxUPFQ8VMhUQFBAUEBQQFDMVDxUzFQ8VMxUPFQ8VDxUPFQ8VMhUADQUAAAAAAAAAAA=='
+      ac_minus:
+        friendly_name: "AC Minus"
+        command_on: 'JgBAAAABGYgVNBQPFQ8VDxUzFQ8VDxUPFQ8VDxUPFQ8VMxUPFQ8VDxUPFTMVDxUPFQ8VMhUQFBAUEBQQFBAUEBQADQUAAAAAAAAAAA=='
+        command_off: 'JgBAAAABGYgVNBQPFQ8VDxUzFQ8VDxUPFQ8VDxUPFQ8VMxUPFQ8VDxUPFTMVDxUPFQ8VMhUQFBAUEBQQFBAUEBQADQUAAAAAAAAAAA=='
+      oki_on:
+        friendly_name: "OKI On/Off"
+        command_on: 'JgAwABwdHB45HiAaIBocPDgeHzggGj0aHAAK0x8cHxo9GhweHxwfNj4aHDofHTgeIAANBQAAAAAAAAAA'
+        command_off: 'JgAwABwdHB45HiAaIBocPDgeHzggGj0aHAAK0x8cHxo9GhweHxwfNj4aHDofHTgeIAANBQAAAAAAAAAA'
+      oki_ch_plus:
+        friendly_name: "OKI CH +"
+        command_on: 'JgA0ABweOR4fHB4bHB4gNh0ePRocHiAaHB4eAArQIRo9GhweHh0fGhw7IBo7HR8aHB4gGiAADQUAAAAA'
+        command_off: 'JgA0ABweOR4fHB4bHB4gNh0ePRocHiAaHB4eAArQIRo9GhweHh0fGhw7IBo7HR8aHB4gGiAADQUAAAAA'
+      oki_ch_minus:
+        friendly_name: "OKI CH -"
+        command_on: 'JgA0AB8aPBwfGhweIBocOx4dOB4gGhweHjofAAqxHR45Hh4dHxocHiA2HR49GhweIBogNx0ADQUAAAAA'
+        command_off: 'JgA0AB8aPBwfGhweIBocOx4dOB4gGhweHjofAAqxHR45Hh4dHxocHiA2HR49GhweIBogNx0ADQUAAAAA'
+      oki_vol_plus:
+        friendly_name: "OKI Vol +"
+        command_on: 'JgAwACEaHB45Hh4dHxocOz02PhocHh8bHwAKzx0eIBo8HB4bHB4gNzs6OB4gGhweHgANBQAAAAAAAAAA'
+        command_off: 'JgAwACEaHB45Hh4dHxocOz02PhocHh8bHwAKzx0eIBo8HB4bHB4gNzs6OB4gGhweHgANBQAAAAAAAAAA'
+      oki_vol_minus:
+        friendly_name: "OKI Vol -"
+        command_on: 'JgAwAB4dOB4gGhweHh0fNj42PB0fGhw7IAAKshwePRocHiAaHB4eODo7OR4eHR83HAANBQAAAAAAAAAA'
+        command_off: 'JgAwAB4dOB4gGhweHh0fNj42PB0fGhw7IAAKshwePRocHiAaHB4eODo7OR4eHR83HAANBQAAAAAAAAAA'
+      oki_src:
+        friendly_name: "OKI src"
+        command_on: 'JgA0AB8bHxs9GhweHxwdOh8aHB4fHDgeIBocAArTHxweGz0aHB4fHB43HR4gGhwePRocHiAADQUAAAAA'
+        command_off: 'JgA0AB8bHxs9GhweHxwdOh8aHB4fHDgeIBocAArTHxweGz0aHB4fHB43HR4gGhwePRocHiAADQUAAAAA'
+      oki_mute:
+        friendly_name: "OKI mute"
+        command_on: 'JgAwAB8aHB45Hh4dHxocOyAaOx0fGhw7OQAK0h8dHxo5HiAaHB4fNyEaPRocHh83OgANBQAAAAAAAAAA'
+        command_off: 'JgAwAB8aHB45Hh4dHxocOyAaOx0fGhw7OQAK0h8dHxo5HiAaHB4fNyEaPRocHh83OgANBQAAAAAAAAAA'
+
+input_number:
+  hours:
+    name: Hour
+    icon: mdi:timer
+    min: 0
+    max: 23
+    step: 1
+
+  minutes:
+    name: Minute
+    icon: mdi:timer 
+    min: 0
+    max: 59
+    step: 1
+
+  temperature:
+    mode: slider
+    name: Temp 
+    icon: mdi:temperature-celsius
+    initial: 21
+    min: 12
+    max: 35
+    step: 0.2
+    unit_of_measurement: "°C"
+
+  duration:
+    name: Duration
+    icon: mdi:timer
+    min: 1
+    max: 23
+    step: 1
